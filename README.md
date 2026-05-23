@@ -1,209 +1,160 @@
-# Proyecto: Plataforma Web de Digitalización Documental
+# Proyecto: Plataforma Web de Digitalización y Gestión Documental
 
-## Descripción general
-
-Este proyecto consiste en el desarrollo de una aplicación web orientada a empresas que aún conservan documentación física y desean migrar sus archivos a formato digital.
-
-La plataforma permitirá consultar planes de servicio, cotizar la digitalización de documentos por volumen, seleccionar servicios adicionales, agendar la recolección de documentos físicos, simular el proceso de compra y dar seguimiento al estado del servicio contratado.
-
-El sistema está pensado como un prototipo funcional para representar una solución de negocio enfocada en la digitalización documental empresarial.
+Aplicación web para la cotización, contratación, seguimiento y gestión de servicios de digitalización documental empresarial. Orientado a empresas que desean convertir sus documentos físicos a formato digital, con opción de administrarlos en una bóveda digital simulada.
 
 ---
 
-## Objetivo del proyecto
+## 🚀 Características Principales
 
-Desarrollar una aplicación web que permita ofrecer, cotizar y contratar servicios de digitalización documental para empresas, integrando una propuesta de valor basada en la entrega flexible de documentos digitalizados y, en el caso del plan premium, una bóveda digital segura simulada para la gestión documental.
+### Planes de Servicio
 
----
+| Plan | Descripción |
+|------|-------------|
+| **Estándar** | Digitalización de documentos físicos y entrega de archivos resultantes |
+| **Premium** | Digitalización + Bóveda Digital con Gestión Documental |
 
-## Propuesta de negocio
+### Servicios Extra
 
-La solución busca apoyar a empresas que cuentan con grandes cantidades de documentos físicos y necesitan transformarlos en archivos digitales para mejorar su administración, consulta y conservación.
-
-La propuesta se basa en dos modalidades principales de servicio:
-
-1. **Plan Estándar**, enfocado en digitalizar documentos y entregarlos al cliente mediante diferentes medios.
-2. **Plan Premium**, enfocado en digitalizar, almacenar, clasificar y consultar documentos dentro de una bóveda digital segura simulada.
-
-Además, el sistema permitirá agregar servicios extra como entrega física en unidad proporcionada por la empresa, digitalización urgente y OCR simulado.
+- ⚡ Digitalización urgente
+- 🔍 OCR simulado
+- 📦 Entrega física en unidad proporcionada por la empresa
 
 ---
 
-## Planes de servicio
+## 🛠️ Tecnologías Utilizadas
 
-### 1. Plan Estándar
+### Frontend
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 
-Dirigido a clientes que únicamente desean digitalizar sus documentos físicos y recibir los archivos resultantes sin almacenarlos permanentemente en la plataforma.
+- **ReactJS** con **Vite** para interfaces de usuario rápidas y componentes reutilizables
 
-#### Incluye:
+### Backend
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
-- Recolección programada.
-- Escaneo masivo.
-- Entrega documental.
+- **FastAPI** (Python) para API REST de alto rendimiento
 
-#### Modalidades de entrega documental:
+### Base de Datos
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
-- Unidad física proporcionada por el cliente.
-- Enlace temporal a la nube de la empresa.
-- Transferencia a la nube del cliente.
-- Entrega mediante servidor SFTP.
-
-Este plan está pensado para empresas que desean conservar el control total de sus documentos digitalizados dentro de su propia infraestructura.
-
----
-
-### 2. Plan Premium
-
-Dirigido a clientes que desean una solución de gestión documental, no solo la digitalización de archivos.
-
-#### Incluye:
-
-- Recolección programada.
-- Escaneo masivo.
-- Bóveda digital segura simulada.
-- Clasificación documental.
-- Consulta en línea.
-- Descarga de archivos.
-
-Este plan representa el valor agregado principal del sistema, ya que permite al cliente consultar y descargar documentos desde una plataforma web, simulando un entorno seguro de almacenamiento documental.
+- **PostgreSQL** alojado en **Supabase** (base de datos remota)
+- **SQLAlchemy** como ORM para gestión de modelos
+- **DBeaver** como herramienta de administración visual
 
 ---
 
-## Servicios extra
+## 🏗️ Arquitectura del Sistema
+Usuario
+↓
+Frontend (ReactJS + Vite)
+↓
+API REST (FastAPI)
+↓
+SQLAlchemy (ORM)
+↓
+PostgreSQL (Supabase)
 
-Los servicios extra se seleccionan durante el proceso de cotización, antes de confirmar la compra.
+text
 
-### Extras disponibles
-
-- Entrega física en unidad ofrecida por la empresa.
-- Digitalización urgente.
-- OCR simulado.
-
-### Descripción de extras
-
-#### Entrega física en unidad ofrecida por la empresa
-
-Permite que la empresa prestadora del servicio entregue los documentos digitalizados en una unidad física propia, como USB, disco duro externo o SSD.
-
-#### Digitalización urgente
-
-Permite reducir el tiempo estimado de entrega del servicio mediante un cargo adicional.
-
-#### OCR simulado
-
-Representa la posibilidad de convertir documentos escaneados en archivos buscables mediante reconocimiento óptico de caracteres. En el prototipo, esta función será simulada.
+- **Patrón MVC**: Modelos, Controladores, Servicios y Vistas
+- **Cliente-Servidor**: Separación clara entre frontend y backend
 
 ---
 
-## Flujo general de la aplicación
+## 📋 Flujo Principal
 
-El flujo principal del sistema será el siguiente:
-
-1. El cliente entra a la plataforma.
-2. Consulta los planes disponibles.
-3. Selecciona el Plan Estándar o el Plan Premium.
-4. Ingresa el volumen estimado de documentos.
-5. Selecciona los servicios extra, si aplica.
-6. Selecciona o propone una fecha de recolección.
-7. El sistema calcula el precio estimado.
-8. El sistema propone una fecha estimada de entrega.
-9. El cliente revisa el resumen de compra.
-10. El cliente confirma la compra.
-11. El sistema simula el pago.
-12. El sistema genera una orden de servicio.
-13. El cliente consulta el seguimiento de su servicio.
-14. El cliente puede cancelar el servicio antes de la recolección física.
+1. **Catálogo**: Cliente consulta planes, precios y extras disponibles
+2. **Cotizador**: Ingresa datos de empresa, selecciona plan, cantidad de páginas, método de entrega, fecha de recolección y extras
+3. **Cálculo Automático**: Backend calcula subtotal, extras, total y fecha estimada de entrega
+4. **Compra**: Simulación de pago (tarjeta, transferencia, contra entrega u orden de compra)
+5. **Orden de Servicio**: Se genera automáticamente tras confirmar pago
+6. **Seguimiento**: Cliente monitorea estado del servicio en tiempo real
+7. **Bóveda Digital** (Plan Premium): Acceso a documentos digitalizados con gestión documental
 
 ---
 
-## Estados del servicio
+## 📊 Fórmula de Cotización
+Subtotal = (cantidad de hojas / 1000) × precio del plan
+Total = Subtotal + Extras
 
-Los estados considerados para el seguimiento de una orden son:
+text
 
-- Cotización generada.
-- Pago pendiente.
-- Pago confirmado.
-- Recolección agendada.
-- Documentos recolectados.
-- En digitalización.
-- En revisión de calidad.
-- Preparando entrega.
-- Entregado.
-- Cancelado.
-- Disponible en bóveda digital.
-
-El estado **Disponible en bóveda digital** aplica principalmente para el Plan Premium.
+- **Digitalización urgente**: Aplica porcentaje adicional al subtotal y reduce tiempo de entrega
+- **OCR / Entrega física**: Costos fijos adicionales
 
 ---
 
-## Cancelaciones y devoluciones
+## 🔄 Estados del Servicio
 
-El sistema deberá incluir una opción de cancelación del servicio.
+| Estado | Descripción |
+|--------|-------------|
+| 📅 Recolección agendada | Servicio programado, pendiente de inicio |
+| 📥 Documentos recolectados | Documentos físicos recibidos |
+| 🖨️ En digitalización | Proceso de escaneo en curso |
+| ✅ Revisión de calidad | Verificación de archivos digitalizados |
+| 📦 Preparando entrega | Archivos listos para envío |
+| 🚀 Entregado | Archivos enviados al cliente |
+| 🏦 Disponible en bóveda | Documentos accesibles en bóveda digital (Premium) |
+| ❌ Cancelado | Orden cancelada (solo en estado inicial) |
 
-La regla principal será:
-
-> El cliente puede cancelar el servicio antes de que se realice la recolección física de los documentos.
-
-Una vez que los documentos hayan sido recolectados o el proceso de digitalización haya iniciado, la cancelación quedará sujeta a revisión administrativa.
-
-Para el prototipo, la cancelación se manejará de forma simulada mediante el cambio de estado de la orden.
-
----
-
-## Pantallas principales del sistema
-
-El prototipo contempla las siguientes interfaces principales:
-
-1. Inicio.
-2. Catálogo de planes.
-3. Cotizador.
-4. Selección de extras.
-5. Agendamiento de recolección.
-6. Resumen de compra.
-7. Pago simulado.
-8. Confirmación de orden.
-9. Seguimiento del servicio.
-10. Cancelación del servicio.
-11. Bóveda digital simulada.
+### Regla de Cancelación
+- Solo permitida en estado **"Recolección agendada"**
+- Al cancelar: estado → `Cancelado`, pago → `Devolución pendiente`
 
 ---
 
-## Arquitectura tecnológica
+## 🏦 Bóveda Digital (Plan Premium)
 
-La arquitectura definida para el proyecto es:
+Sistema de gestión documental con metadatos avanzados:
 
-- **Frontend:** ReactJS.
-- **Backend:** FastAPI.
-- **Base de datos:** PostgreSQL.
-- **ORM:** SQLAlchemy.
-- **Administrador de base de datos:** DBeaver.
-- **Base de datos remota:** Supabase.
-- **Control de versiones:** Git y GitHub.
+### Metadatos por Documento
+- Nombre del archivo
+- Tipo documental
+- Categoría
+- Área / Departamento
+- Descripción
+- Palabras clave
+- Fecha del documento
+- Nivel de confidencialidad
+- Años de conservación
+- Estado OCR
+- Estado de seguridad
+- URL de almacenamiento
+
+### Funcionalidades
+- 🔍 Búsqueda avanzada por filtros (nombre, tipo, categoría, área, confidencialidad, etc.)
+- 📂 Clasificación documental
+- ⬇️ Descarga de archivos
+- 🚫 Bloqueo automático para órdenes de Plan Estándar
 
 ---
 
-## Arquitectura MVC
+## 🗄️ Estructura de Base de Datos
 
-El proyecto utilizará una organización basada en el patrón MVC.
+| Tabla | Descripción |
+|-------|-------------|
+| `services` | Planes del sistema |
+| `extras` | Servicios adicionales |
+| `quotations` | Cotizaciones generadas |
+| `quotation_extras` | Relación cotizaciones ↔ extras |
+| `orders` | Órdenes de servicio |
+| `vault_documents` | Documentos en bóveda digital y metadatos |
 
-En este sistema, el patrón se interpreta de la siguiente forma:
+---
 
-| Elemento MVC | Implementación en el proyecto |
-|-------------|-------------------------------|
-| Modelo | Modelos SQLAlchemy y tablas en PostgreSQL |
-| Vista | Interfaces desarrolladas en ReactJS |
-| Controlador | Endpoints y controladores desarrollados con FastAPI |
-| Lógica de negocio | Servicios internos del backend |
+## ✅ Funcionalidades Implementadas
 
-El flujo de comunicación será:
+- [x] Consulta de planes y extras
+- [x] Generación de cotizaciones con cálculo automático
+- [x] Creación de órdenes desde cotizaciones
+- [x] Simulación de pagos (múltiples métodos)
+- [x] Seguimiento de órdenes por estados
+- [x] Cancelación de órdenes (solo estado inicial)
+- [x] Panel de administración para cambio de estados
+- [x] Bóveda digital con gestión documental (Plan Premium)
+- [x] Búsqueda y filtrado de documentos (Plan Premium)
+- [x] Bloqueo de bóveda para Plan Estándar
 
-```text
-ReactJS
-    ↓
-Controladores FastAPI
-    ↓
-Servicios de negocio
-    ↓
-Modelos SQLAlchemy
-    ↓
-PostgreSQL
+---
