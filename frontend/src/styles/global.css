@@ -178,7 +178,7 @@ input, textarea, select {
 .vault-field textarea {
   width: 100%;
   padding: 0.9rem 1rem;
-  color: black;
+  color: var(--color-text);
   border: 1px solid #d8e0e8;
   border-radius: 12px;
   font-size: 0.95rem;
