@@ -2,9 +2,11 @@
 backend/venv/
 backend/__pycache__/
 backend/app/__pycache__/
+backend/app/models/__pycache__/
+backend/app/schemas/__pycache__/
+backend/app/controllers/__pycache__/
+backend/app/services/__pycache__/
 *.pyc
-*.pyo
-*.pyd
 
 # Variables de entorno
 backend/.env
@@ -17,6 +19,6 @@ frontend/dist/
 # VS Code
 .vscode/
 
-# Sistema operativo
+# Sistema
 .DS_Store
 Thumbs.db
