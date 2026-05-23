@@ -31,7 +31,7 @@ def add_vault_document(
     document_data: VaultDocumentCreate
 ):
     """
-    Agrega un documento simulado a la bóveda digital
+    Agrega un documento a la bóveda digital
     de una orden Premium.
     """
 
@@ -47,6 +47,13 @@ def add_vault_document(
         file_name=document_data.file_name,
         document_type=document_data.document_type,
         category=document_data.category,
+
+        department=document_data.department,
+        description=document_data.description,
+        keywords=document_data.keywords,
+        document_date=document_data.document_date,
+        confidentiality_level=document_data.confidentiality_level,
+
         security_status=document_data.security_status,
         ocr_status=document_data.ocr_status,
         storage_url=document_data.storage_url
@@ -66,7 +73,7 @@ def add_vault_document(
 
 def get_vault_documents(db: Session, order_id: int):
     """
-    Obtiene los documentos simulados de la bóveda
+    Obtiene los documentos de la bóveda
     para una orden Premium.
     """
 

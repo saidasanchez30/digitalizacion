@@ -83,7 +83,7 @@ def cancel_order(db: Session, order_id: int):
 
 def update_order_status(db: Session, order_id: int, new_status: str):
     """
-    Actualiza el estado de una orden para simular
+    Actualiza el estado de una orden para ver
     el avance del servicio de digitalización.
     """
 
