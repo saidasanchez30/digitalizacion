@@ -91,8 +91,8 @@ function Vault() {
       setLoading(true);
       setError(null);
 
-      const data = await getVaultDocuments(parseInt(orderId, 10));
-      setDocuments(data);
+      const res = await getVaultDocuments(parseInt(orderId, 10));
+      setDocuments(res.data);
     } catch (err) {
       setError(
         err.response?.data?.detail ||
@@ -138,8 +138,8 @@ function Vault() {
 
       await postVaultDocument(parseInt(orderId, 10), formData);
 
-      const data = await getVaultDocuments(parseInt(orderId, 10));
-      setDocuments(data);
+      const res = await getVaultDocuments(parseInt(orderId, 10));
+      setDocuments(res.data);
     } catch (err) {
       setError('Error al agregar documento: ' + (err.response?.data?.detail || err.message));
     } finally {
