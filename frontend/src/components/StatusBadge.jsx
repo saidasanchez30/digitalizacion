@@ -1,33 +1,35 @@
-import React from 'react';
-import { getOrderStatusLabel, getOrderStatusColor, getPaymentStatusLabel, getPaymentStatusColor } from '../utils/statusLabels';
+import {
+  getOrderStatusLabel, getOrderStatusColor,
+  getPaymentStatusLabel, getPaymentStatusColor,
+} from '../utils/statusLabels';
 
 function StatusBadge({ status, type = 'order' }) {
-  let label, color;
+  const label = type === 'order'
+    ? getOrderStatusLabel(status)
+    : type === 'payment'
+      ? getPaymentStatusLabel(status)
+      : status;
 
-  if (type === 'order') {
-    label = getOrderStatusLabel(status);
-    color = getOrderStatusColor(status);
-  } else if (type === 'payment') {
-    label = getPaymentStatusLabel(status);
-    color = getPaymentStatusColor(status);
-  } else {
-    label = status;
-    color = '#6b7280';
-  }
+  const color = type === 'order'
+    ? getOrderStatusColor(status)
+    : type === 'payment'
+      ? getPaymentStatusColor(status)
+      : '#6b7280';
 
   return (
-    <span
-      style={{
-        display: 'inline-block',
-        padding: '0.25rem 0.75rem',
-        borderRadius: 'var(--border-radius)',
-        fontSize: 'var(--font-size-sm)',
-        fontWeight: '600',
-        backgroundColor: `${color}15`,
-        color: color,
-        textTransform: 'uppercase',
-      }}
-    >
+    <span style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      padding: '4px 12px',
+      borderRadius: 'var(--radius-full)',
+      fontSize: 'var(--text-xs)',
+      fontWeight: 700,
+      letterSpacing: '0.04em',
+      backgroundColor: `${color}18`,
+      color: color,
+      border: `1px solid ${color}30`,
+      whiteSpace: 'nowrap',
+    }}>
       {label}
     </span>
   );
