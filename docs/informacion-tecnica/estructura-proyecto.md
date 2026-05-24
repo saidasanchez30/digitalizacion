@@ -9,9 +9,24 @@ digitalizacion/
 ├── .gitignore                       ← Exclusiones de Git
 │
 ├── backend/                         ← Aplicación FastAPI
-│   ├── requirements.txt             ← Dependencias Python
+│   ├── requirements.txt             ← Dependencias Python (producción)
+│   ├── requirements-test.txt        ← Dependencias exclusivas de tests
+│   ├── pytest.ini                   ← Configuración de pytest
+│   ├── run_tests.py                 ← Ejecuta tests y exporta resultados a CSV
 │   ├── .env                         ← Variables de entorno (NO en Git)
 │   ├── seed.py                      ← Script principal de seeders
+│   │
+│   ├── tests/                       ← Suite de pruebas automatizadas
+│   │   ├── conftest.py              ← Fixtures: BD SQLite en memoria + cliente HTTP
+│   │   ├── test_health.py           ← Tests del endpoint raíz
+│   │   ├── test_services.py         ← Tests de GET /services/
+│   │   ├── test_extras.py           ← Tests de GET /extras/
+│   │   ├── test_quotations.py       ← Tests de POST/GET /quotations/
+│   │   ├── test_orders.py           ← Tests de órdenes, cancelación y estados
+│   │   └── test_vault.py            ← Tests de bóveda digital (plan Premium)
+│   │
+│   ├── test-results/                ← Salida CSV generada por run_tests.py (NO en Git)
+│   │   └── results.csv
 │   │
 │   └── app/
 │       ├── main.py                  ← Punto de entrada ASGI, routers, CORS
@@ -116,7 +131,8 @@ digitalizacion/
     ├── instalacion-configuracion-despligue/
     ├── manual-instalacion-multientorno/
     ├── api-solicitudes/
-    └── documentacion-adicional/
+    ├── documentacion-adicional/
+    └── control-calidad/             ← Estrategia de pruebas y guiones manuales
 ```
 
 ---
@@ -143,5 +159,8 @@ digitalizacion/
 | `backend/app/config.py`    | Carga y valida las variables de entorno.            |
 | `backend/app/database.py`  | Configura el engine SQLAlchemy y `get_db()`.        |
 | `backend/app/main.py`      | Registra routers, middleware CORS y auto-crea tablas.|
+| `backend/pytest.ini`       | Configura pytest: directorio de tests y flags por defecto. |
+| `backend/run_tests.py`     | Ejecuta la suite y exporta resultados a CSV.        |
+| `backend/tests/conftest.py`| BD SQLite en memoria + fixtures reutilizables para tests. |
 | `frontend/vite.config.js`  | Configuración del servidor de desarrollo y build.   |
 | `frontend/eslint.config.js`| Reglas de linting para el frontend.                |

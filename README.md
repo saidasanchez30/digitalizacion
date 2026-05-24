@@ -134,6 +134,23 @@ Abrir [http://localhost:5173](http://localhost:5173) en el navegador.
 
 ---
 
+## Tests
+
+```bash
+cd backend
+source venv/bin/activate
+pytest
+# 61 passed in ~1.6s
+```
+
+Los tests usan SQLite en memoria: no requieren el servidor ni PostgreSQL activos. Para exportar los resultados a CSV:
+
+```bash
+python run_tests.py   # Genera backend/test-results/results.csv
+```
+
+---
+
 ## Ejecución en desarrollo
 
 ```bash
@@ -193,6 +210,7 @@ Los seeders verifican si los registros ya existen antes de insertar, por lo que 
 | [Dependencias clave](docs/informacion-tecnica/dependencias-clave.md) | Justificación de cada dependencia |
 | [Comandos útiles](docs/informacion-tecnica/comandos-utiles.md) | Referencia de comandos frecuentes |
 | [API — Endpoints y ejemplos](docs/api-solicitudes/index.md) | Documentación completa de la API |
+| [Control de calidad](docs/control-calidad/index.md) | Suite de tests, guiones manuales y cobertura |
 | [Diccionario de datos](docs/documentacion-adicional/diccionario-datos.md) | Tablas, columnas y tipos |
 | [Instrucciones de configuración](docs/instalacion-configuracion-despligue/instrucciones-configuracion.md) | Variables de entorno y ajustes |
 | [Ambientes de trabajo](docs/instalacion-configuracion-despligue/ambientes-trabajo.md) | Diferencias entre dev / staging / prod |

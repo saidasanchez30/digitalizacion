@@ -90,6 +90,36 @@ Este documento explica por qué se eligió cada dependencia principal y cuándo 
 
 ---
 
+---
+
+## Tests — `backend/requirements-test.txt`
+
+Estas dependencias son exclusivas del entorno de pruebas y no se instalan en producción.
+
+### pytest `9.0.3`
+
+**Por qué**: Framework de testing estándar en Python. Permite escribir tests como funciones simples, tiene un sistema de fixtures potente para compartir datos entre tests, y genera salidas claras con nombres de tests descriptivos.
+
+**Cuándo actualizar**: Al necesitar compatibilidad con nuevas funcionalidades de Python o correcciones de comportamiento en la recolección de tests.
+
+---
+
+### httpx `0.28.1`
+
+**Por qué**: Requerido internamente por `TestClient` de Starlette/FastAPI para simular peticiones HTTP en los tests de integración sin necesidad de levantar un servidor real.
+
+**Cuándo actualizar**: Junto con FastAPI. Cambios de versión mayor pueden requerir ajustes si se usa la API async de httpx directamente.
+
+---
+
+### pytest-cov `7.1.0`
+
+**Por qué**: Integra la medición de cobertura de código (`coverage.py`) con pytest. Permite identificar ramas de código que no están cubiertas por ningún test mediante `pytest --cov=app --cov-report=term-missing`.
+
+**Cuándo actualizar**: Solo ante incompatibilidades con versiones nuevas de pytest.
+
+---
+
 ## Dependencias que NO están en el proyecto (y por qué)
 
 | Dependencia  | Por qué no se usa                                                            |
@@ -98,4 +128,4 @@ Este documento explica por qué se eligió cada dependencia principal y cuándo 
 | Redux / Zustand | El estado global es mínimo (solo autenticación). `AuthContext` es suficiente. |
 | Tailwind CSS | El proyecto usa un sistema de diseño propio con variables CSS personalizadas.   |
 | JWT / OAuth  | La autenticación del admin es simulada (demo). No requiere tokens reales.       |
-| pytest       | No hay suite de pruebas automatizadas en el estado actual del proyecto.        |
+| pytest-asyncio | Los endpoints son síncronos (`def`, no `async def`), por lo que `TestClient` de Starlette cubre todos los casos sin necesitar soporte async en los tests. |

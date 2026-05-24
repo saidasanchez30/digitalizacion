@@ -108,6 +108,8 @@ Un PR debe cumplir todos los siguientes puntos para ser aprobado:
 - [ ] Si se agrega un endpoint, está documentado en `docs/api-solicitudes/index.md`.
 - [ ] Si se modifica el esquema de base de datos, se actualiza `docs/documentacion-adicional/diccionario-datos.md`.
 - [ ] El frontend pasa `npm run lint` sin errores.
+- [ ] `pytest` pasa sin errores (`61 passed` o más si se añaden tests nuevos).
+- [ ] Si se añade o modifica un endpoint, se incluyen tests automatizados para ese endpoint.
 - [ ] El comportamiento fue verificado manualmente en el navegador.
 
 ### Tamaño recomendado
@@ -118,29 +120,50 @@ Los PRs deben ser pequeños y enfocados: máximo 400 líneas de cambio neto. Los
 
 ## Pruebas
 
-El proyecto no cuenta actualmente con un suite de pruebas automatizadas. Las verificaciones se realizan de forma manual:
+### Suite automatizada (backend)
 
-### Backend
+El proyecto cuenta con 61 tests de integración en `backend/tests/`. Usan una base de datos SQLite en memoria: **no requieren el servidor ni PostgreSQL activos**.
 
 ```bash
-# Verificar que la API arranca sin errores
-uvicorn app.main:app --reload --port 8001
-
-# Probar endpoints con Swagger UI
-# http://localhost:8001/docs
+cd backend
+source venv/bin/activate
+pip install -r requirements-test.txt   # Solo la primera vez
+pytest
 ```
 
-### Frontend
+Antes de abrir un PR, todos los tests deben pasar:
+
+```
+======================= 61 passed in 1.6s ========================
+```
+
+Para exportar los resultados a CSV (útil para incluir en el PR):
+
+```bash
+python run_tests.py
+# Genera: backend/test-results/results.csv
+```
+
+Ver la referencia completa de comandos en [docs/informacion-tecnica/comandos-utiles.md](docs/informacion-tecnica/comandos-utiles.md#tests).
+
+### Al agregar una nueva funcionalidad
+
+Si el PR añade o modifica un endpoint, debe incluir los tests correspondientes en `backend/tests/`. Seguir el patrón existente:
+
+- Un archivo por módulo (`test_<nombre>.py`).
+- Tests agrupados en clases (`class Test<Escenario>`).
+- Nombres de test en español que describan el escenario (`test_falla_con_cotizacion_cancelada`).
+- Usar las fixtures de `conftest.py` para crear datos; no insertar directamente con SQL.
+
+### Verificación manual (frontend)
 
 ```bash
 # Lint
-npm run lint
+cd frontend && npm run lint
 
 # Verificar el build de producción
 npm run build && npm run preview
 ```
-
-Al agregar nuevas funcionalidades, incluir en el PR una descripción de los escenarios probados manualmente (ruta feliz y casos límite).
 
 ---
 
@@ -159,10 +182,11 @@ Cualquier cambio que afecte comportamiento externo debe acompañarse de la actua
 
 | Si cambias...          | Actualiza también...                                         |
 |------------------------|--------------------------------------------------------------|
-| Un endpoint de la API  | `docs/api-solicitudes/index.md`                              |
+| Un endpoint de la API  | `docs/api-solicitudes/index.md` + tests en `backend/tests/` |
 | El esquema de BD       | `docs/documentacion-adicional/diccionario-datos.md`          |
 | Variables de entorno   | `SECURITY_CONFIG.md` y `docs/instalacion-configuracion-despligue/instrucciones-configuracion.md` |
 | Pasos de instalación   | `docs/manual-instalacion-multientorno/index.md`              |
+| Los tests o su estructura | `docs/control-calidad/index.md`                           |
 
 ---
 

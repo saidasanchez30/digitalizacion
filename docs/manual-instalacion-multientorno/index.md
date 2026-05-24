@@ -11,9 +11,10 @@ Guía paso a paso para instalar y desplegar el sistema de Digitalización Docume
 3. [Instalación en desarrollo local](#3-instalación-en-desarrollo-local)
 4. [Configuración de la base de datos](#4-configuración-de-la-base-de-datos)
 5. [Poblar datos iniciales](#5-poblar-datos-iniciales)
-6. [Verificación del sistema](#6-verificación-del-sistema)
-7. [Despliegue en staging/producción](#7-despliegue-en-stagingproducción)
-8. [Resolución de problemas frecuentes](#8-resolución-de-problemas-frecuentes)
+6. [Ejecutar la suite de tests](#6-ejecutar-la-suite-de-tests)
+7. [Verificación del sistema](#7-verificación-del-sistema)
+8. [Despliegue en staging/producción](#8-despliegue-en-stagingproducción)
+9. [Resolución de problemas frecuentes](#9-resolución-de-problemas-frecuentes)
 
 ---
 
@@ -182,9 +183,45 @@ Si los datos ya existen, el seeder los omite y continúa sin errores.
 
 ---
 
-## 6. Verificación del sistema
+## 6. Ejecutar la suite de tests
 
-### 6.1 Iniciar el backend
+Este paso verifica que el código funciona correctamente antes de arrancar el sistema. Los tests usan una base de datos SQLite en memoria propia, por lo que **no requieren que el backend ni PostgreSQL estén en marcha**.
+
+```bash
+cd backend
+source venv/bin/activate
+pip install -r requirements-test.txt   # Solo la primera vez
+pytest
+```
+
+**Salida esperada:**
+
+```
+============================= test session starts ==============================
+collected 61 items
+
+tests/test_extras.py::TestListarExtras::test_retorna_lista_vacia_sin_datos PASSED
+...
+tests/test_vault.py::TestListarDocumentosBoveda::test_falla_listar_boveda_de_orden_inexistente PASSED
+
+======================= 61 passed in 1.6s ========================
+```
+
+Si algún test falla, revisar los mensajes de error antes de continuar con el despliegue.
+
+Para exportar los resultados a CSV:
+
+```bash
+python run_tests.py
+# Genera: backend/test-results/results.csv
+```
+
+---
+
+## 7. Verificación del sistema
+
+### 7.1 Iniciar el backend
+
 
 ```bash
 cd backend
@@ -212,7 +249,7 @@ curl http://localhost:8001/services/
 # Lista de planes de servicio en JSON
 ```
 
-### 6.2 Iniciar el frontend
+### 7.2 Iniciar el frontend
 
 ```bash
 cd frontend
@@ -230,15 +267,15 @@ npm run dev
 
 Abrir [http://localhost:5173](http://localhost:5173) en el navegador. Debe cargar la página principal del sistema.
 
-### 6.3 Verificar la API documentada
+### 7.3 Verificar la API documentada
 
 Abrir [http://localhost:8001/docs](http://localhost:8001/docs) para acceder a Swagger UI y probar los endpoints manualmente.
 
 ---
 
-## 7. Despliegue en staging/producción
+## 8. Despliegue en staging/producción
 
-### 7.1 Build del frontend
+### 8.1 Build del frontend
 
 ```bash
 cd frontend
@@ -247,7 +284,7 @@ npm run build
 
 Genera la carpeta `frontend/dist/` con los archivos estáticos optimizados.
 
-### 7.2 Servir el backend con múltiples workers
+### 8.2 Servir el backend con múltiples workers
 
 ```bash
 cd backend
@@ -255,11 +292,11 @@ source venv/bin/activate
 uvicorn app.main:app --host 0.0.0.0 --port 8001 --workers 4
 ```
 
-### 7.3 Configurar nginx
+### 8.3 Configurar nginx
 
 Ver la configuración de referencia en [ambientes-trabajo.md](../instalacion-configuracion-despligue/ambientes-trabajo.md#configuración-de-nginx-referencia).
 
-### 7.4 Variables de entorno en producción
+### 8.4 Variables de entorno en producción
 
 Actualizar `backend/.env` con las credenciales de producción:
 
@@ -273,7 +310,7 @@ Actualizar CORS en `backend/app/main.py`:
 allow_origins=["https://tu-dominio.com"]
 ```
 
-### 7.5 Reiniciar el servicio
+### 8.5 Reiniciar el servicio
 
 Si se usa un gestor de procesos (systemd, supervisor):
 
@@ -284,7 +321,7 @@ sudo systemctl restart digitalizacion-backend
 
 ---
 
-## 8. Resolución de problemas frecuentes
+## 9. Resolución de problemas frecuentes
 
 ### Error: `No se encontró DATABASE_URL en el archivo .env`
 

@@ -104,6 +104,61 @@ npm run preview
 
 ---
 
+## Tests
+
+### Instalar dependencias de tests (una sola vez)
+
+```bash
+cd backend
+source venv/bin/activate
+pip install -r requirements-test.txt
+```
+
+### Ejecutar todos los tests
+
+```bash
+cd backend
+source venv/bin/activate
+pytest
+```
+
+### Ejecutar tests y exportar resultados a CSV
+
+```bash
+cd backend
+source venv/bin/activate
+python run_tests.py
+# Genera: backend/test-results/results.csv
+```
+
+### Opciones del script de exportación
+
+```bash
+# Solo un módulo
+python run_tests.py --module tests/test_orders.py
+
+# Ruta personalizada para el CSV
+python run_tests.py --output test-results/ejecucion_2026-06-01.csv
+```
+
+### Opciones útiles de pytest
+
+```bash
+# Solo tests de un módulo concreto
+pytest tests/test_quotations.py
+
+# Filtrar tests por nombre
+pytest -k "cancelar"
+
+# Traza de error completa
+pytest --tb=long
+
+# Informe de cobertura de código
+pytest --cov=app --cov-report=term-missing
+```
+
+---
+
 ## Base de datos
 
 ### Conectarse a PostgreSQL local

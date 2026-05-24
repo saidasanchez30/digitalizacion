@@ -6,7 +6,13 @@ backend/app/models/__pycache__/
 backend/app/schemas/__pycache__/
 backend/app/controllers/__pycache__/
 backend/app/services/__pycache__/
+backend/tests/__pycache__/
 *.pyc
+
+# Tests — resultados generados localmente
+backend/test-results/
+.coverage
+htmlcov/
 
 # Variables de entorno
 backend/.env
