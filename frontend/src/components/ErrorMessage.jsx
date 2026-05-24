@@ -1,10 +1,11 @@
-import React from 'react';
-
 function ErrorMessage({ title = 'Error', message = '' }) {
   return (
     <div className="alert alert-error">
-      <h4 style={{ marginBottom: '0.5rem' }}>{title}</h4>
-      {message && <p>{message}</p>}
+      <span className="alert-icon">❌</span>
+      <div>
+        <strong>{title}</strong>
+        {message && <><br />{message}</>}
+      </div>
     </div>
   );
 }
