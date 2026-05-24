@@ -53,6 +53,7 @@ def add_vault_document(
         keywords=document_data.keywords,
         document_date=document_data.document_date,
         confidentiality_level=document_data.confidentiality_level,
+        retention_years=document_data.retention_years,
 
         security_status=document_data.security_status,
         ocr_status=document_data.ocr_status,
