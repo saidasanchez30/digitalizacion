@@ -1,77 +1,41 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
-
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: 'http://127.0.0.1:8001',
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 15000,
 });
 
-// SERVICES
-export const getServices = async () => {
-  const response = await apiClient.get('/services/');
-  return response.data;
-};
+/* ── Interceptor: respuesta estándar ── */
+apiClient.interceptors.response.use(
+  res => res,
+  err => {
+    /* Normaliza errores de red para mensaje legible */
+    if (!err.response) {
+      err.message = 'No se pudo conectar con el servidor. Verifica que el backend esté activo.';
+    }
+    return Promise.reject(err);
+  }
+);
 
-// EXTRAS
-export const getExtras = async () => {
-  const response = await apiClient.get('/extras/');
-  return response.data;
-};
+/* ── Services ── */
+export const getServices = () => apiClient.get('/services/');
+export const getExtras   = () => apiClient.get('/extras/');
 
-// QUOTATIONS
-export const postQuotation = async (quotationData) => {
-  const response = await apiClient.post('/quotations/', quotationData);
-  return response.data;
-};
+/* ── Quotations ── */
+export const postQuotation    = (data) => apiClient.post('/quotations/', data);
+export const getQuotations    = ()     => apiClient.get('/quotations/');
+export const getQuotationById = (id)   => apiClient.get(`/quotations/${id}`);
 
-export const getQuotations = async () => {
-  const response = await apiClient.get('/quotations/');
-  return response.data;
-};
+/* ── Orders ── */
+export const postOrder       = (data)       => apiClient.post('/orders/', data);
+export const getOrders       = ()           => apiClient.get('/orders/');
+export const getOrderById    = (id)         => apiClient.get(`/orders/${id}`);
+export const cancelOrder     = (id)         => apiClient.post(`/orders/${id}/cancel`);
+export const updateOrderStatus = (id, data) => apiClient.put(`/orders/${id}/status`, data);
 
-export const getQuotationById = async (quotationId) => {
-  const response = await apiClient.get(`/quotations/${quotationId}`);
-  return response.data;
-};
-
-// ORDERS
-export const postOrder = async (orderData) => {
-  const response = await apiClient.post('/orders/', orderData);
-  return response.data;
-};
-
-export const getOrders = async () => {
-  const response = await apiClient.get('/orders/');
-  return response.data;
-};
-
-export const getOrderById = async (orderId) => {
-  const response = await apiClient.get(`/orders/${orderId}`);
-  return response.data;
-};
-
-export const cancelOrder = async (orderId) => {
-  const response = await apiClient.post(`/orders/${orderId}/cancel`);
-  return response.data;
-};
-
-export const updateOrderStatus = async (orderId, statusData) => {
-  const response = await apiClient.put(`/orders/${orderId}/status`, statusData);
-  return response.data;
-};
-
-// VAULT
-export const getVaultDocuments = async (orderId) => {
-  const response = await apiClient.get(`/orders/${orderId}/vault`);
-  return response.data;
-};
-
-export const postVaultDocument = async (orderId, documentData) => {
-  const response = await apiClient.post(`/orders/${orderId}/vault/documents`, documentData);
-  return response.data;
-};
+/* ── Vault ── */
+export const getVaultDocuments  = (orderId)       => apiClient.get(`/orders/${orderId}/vault`);
+export const postVaultDocument  = (orderId, data) => apiClient.post(`/orders/${orderId}/vault/documents`, data);
 
 export default apiClient;
