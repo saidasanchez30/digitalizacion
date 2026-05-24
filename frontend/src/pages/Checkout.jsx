@@ -1,384 +1,287 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useApiGet, useApiMutation } from '../hooks/useApi';
 import { getQuotationById, postOrder } from '../api/api';
-import Loading from '../components/Loading';
-import ErrorMessage from '../components/ErrorMessage';
-import StatusBadge from '../components/StatusBadge';
-import { formatCurrency, formatDate } from '../utils/formatters';
-import { validateCheckoutForm } from '../utils/validation';
+import { formatCurrency, formatDate, formatPages } from '../utils/formatters';
+
+const PAYMENT_METHODS = [
+  { value: 'credit_card',       icon: '💳', label: 'Tarjeta de crédito/débito',     desc: 'Visa, Mastercard, American Express' },
+  { value: 'bank_transfer',     icon: '🏦', label: 'Transferencia bancaria',         desc: 'PSE · Nequi · Daviplata' },
+  { value: 'cash_on_delivery',  icon: '💵', label: 'Pago contra entrega',            desc: 'Pago en efectivo al recibir los archivos' },
+  { value: 'purchase_order',    icon: '📋', label: 'Orden de compra empresarial',    desc: 'Para empresas con crédito aprobado' },
+];
+
+const TRUST_ITEMS = [
+  { icon: '🔒', text: 'Pago 100% seguro' },
+  { icon: '🛡️', text: 'Datos encriptados' },
+  { icon: '↩️', text: 'Cancelación gratuita' },
+  { icon: '📞', text: 'Soporte 24/7' },
+];
 
 function Checkout() {
   const { quotationId } = useParams();
-  const navigate = useNavigate();
-
-  const [quotation, setQuotation] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(null);
-  const [orderCreated, setOrderCreated] = useState(null);
-
   const [paymentMethod, setPaymentMethod] = useState('');
-  const [paymentError, setPaymentError] = useState(null);
+  const [confirmed, setConfirmed]         = useState(null);
 
-  const paymentMethods = [
-    { value: 'Tarjeta', label: 'Tarjeta de crédito o débito' },
-    { value: 'Transferencia bancaria', label: 'Transferencia bancaria' },
-    { value: 'Pago contra entrega', label: 'Pago contra entrega' },
-    { value: 'Orden de compra empresarial', label: 'Orden de compra empresarial' },
-  ];
+  const { data: quotation, loading: qLoad, error: qErr } = useApiGet(
+    () => getQuotationById(quotationId),
+    [quotationId]
+  );
 
-  useEffect(() => {
-    const fetchQuotation = async () => {
-      try {
-        const data = await getQuotationById(quotationId);
-        setQuotation(data);
-        setError(null);
-      } catch (err) {
-        setError(
-          err.response?.data?.detail ||
-          err.message ||
-          'Error al cargar la cotización'
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { execute: createOrder, loading: ordering, error: orderErr } = useApiMutation(postOrder);
 
-    if (quotationId) {
-      fetchQuotation();
-    } else {
-      setError('ID de cotización inválido');
-      setLoading(false);
-    }
-  }, [quotationId]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Validar
-    const { isValid, errors } = validateCheckoutForm({ payment_method: paymentMethod });
-    if (!isValid) {
-      setPaymentError(errors.payment_method);
-      return;
-    }
-
+  const handleConfirm = async () => {
+    if (!paymentMethod) return;
     try {
-      setSubmitting(true);
-      const response = await postOrder({
-        quotation_id: parseInt(quotationId),
-        payment_method: paymentMethod,
-      });
-      setOrderCreated(response);
-      setError(null);
-    } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Error al crear la orden');
-    } finally {
-      setSubmitting(false);
-    }
+      const order = await createOrder({ quotation_id: Number(quotationId), payment_method: paymentMethod });
+      setConfirmed(order);
+    } catch (_) {}
   };
 
-  if (loading) return <Loading message="Cargando cotización..." />;
-  if (error && !orderCreated) return <ErrorMessage title="Error" message={error} />;
+  /* ── Loading / Error ── */
+  if (qLoad) return (
+    <div className="page-wrapper">
+      <div className="spinner-wrapper" style={{ minHeight: '60vh' }}><div className="spinner" /></div>
+    </div>
+  );
 
-  // Si la orden fue creada exitosamente
-  if (orderCreated) {
-    return (
-      <div>
-        <div className="alert alert-success">
-          <h3>✓ Orden creada exitosamente</h3>
+  if (qErr) return (
+    <div className="page-wrapper">
+      <div className="container" style={{ maxWidth: 720, paddingTop: 'var(--space-12)' }}>
+        <div className="alert alert-error">
+          <span className="alert-icon">❌</span>
+          <div><strong>No encontramos la cotización</strong><br />{qErr}</div>
         </div>
+        <Link to="/quotation" className="btn btn-primary" style={{ marginTop: 'var(--space-6)' }}>
+          Crear nueva cotización
+        </Link>
+      </div>
+    </div>
+  );
 
-        <div className="card" style={{ marginBottom: 'var(--space-2xl)' }}>
-          <h2 style={{ marginBottom: 'var(--space-lg)' }}>Confirmación de orden</h2>
+  /* ── Success screen ── */
+  if (confirmed) return (
+    <div className="page-wrapper">
+      <div className="container" style={{ maxWidth: 720, paddingTop: 'var(--space-12)', paddingBottom: 'var(--space-16)' }}>
+        <div className="card card-body-lg" style={{ textAlign: 'center', animation: 'fadeInScale 0.4s ease' }}>
+          <div style={{ fontSize: '5rem', marginBottom: 'var(--space-5)', animation: 'float 3s ease-in-out infinite' }}>✅</div>
+          <h2 style={{ fontSize: 'var(--text-3xl)', fontWeight: 800, marginBottom: 'var(--space-3)', letterSpacing: '-0.03em' }}>
+            ¡Orden confirmada!
+          </h2>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-lg)', marginBottom: 'var(--space-8)' }}>
+            Tu orden <strong style={{ color: 'var(--color-brand)' }}>#{confirmed.id}</strong> ha sido registrada exitosamente.
+            Nos pondremos en contacto para coordinar la recolección.
+          </p>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: 'var(--space-lg)',
-            marginBottom: 'var(--space-lg)',
-          }}>
-            <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-light)' }}>
-                ID de orden
+          <div className="checkout-confirm-details">
+            {[
+              ['Estado de orden',   'Recolección programada 📅'],
+              ['Estado de pago',    'Pago confirmado ✅'],
+              ['Método de pago',    PAYMENT_METHODS.find(p => p.value === confirmed.payment_method)?.label ?? confirmed.payment_method],
+              ['Fecha de orden',    formatDate(confirmed.created_at)],
+            ].map(([k, v]) => (
+              <div key={k} className="checkout-confirm-row">
+                <span>{k}</span><strong>{v}</strong>
               </div>
-              <div style={{ fontSize: 'var(--font-size-2xl)', fontWeight: '700', color: 'var(--color-secondary)' }}>
-                #{orderCreated.id}
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-light)' }}>
-                Estado de orden
-              </div>
-              <div style={{ marginTop: 'var(--space-sm)' }}>
-                <StatusBadge status={orderCreated.order_status} type="order" />
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-light)' }}>
-                Estado de pago
-              </div>
-              <div style={{ marginTop: 'var(--space-sm)' }}>
-                <StatusBadge status={orderCreated.payment_status} type="payment" />
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-light)' }}>
-                Método de pago
-              </div>
-              <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '600', marginTop: 'var(--space-sm)' }}>
-                {orderCreated.payment_method}
-              </div>
-            </div>
+            ))}
           </div>
 
-          <div style={{
-            padding: 'var(--space-lg)',
-            backgroundColor: 'var(--color-bg)',
-            borderRadius: 'var(--border-radius)',
-            marginBottom: 'var(--space-lg)',
-          }}>
-            <h3 style={{ marginBottom: 'var(--space-lg)' }}>Resumen de cotización</h3>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto',
-              gap: 'var(--space-lg)',
-            }}>
-              <div>Subtotal</div>
-              <div>{formatCurrency(quotation.subtotal)}</div>
-
-              {quotation.extras_total > 0 && (
-                <>
-                  <div>Extras</div>
-                  <div>{formatCurrency(quotation.extras_total)}</div>
-                </>
-              )}
-
-              <div style={{
-                gridColumn: '1 / -1',
-                borderTop: '2px solid var(--color-border)',
-                paddingTop: 'var(--space-lg)',
-                display: 'grid',
-                gridTemplateColumns: '1fr auto',
-                gap: 'var(--space-lg)',
-              }}>
-                <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '700' }}>
-                  Total a pagar
-                </div>
-                <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '700', color: 'var(--color-secondary)' }}>
-                  {formatCurrency(quotation.total)}
-                </div>
-              </div>
-            </div>
+          <div className="alert alert-info" style={{ marginTop: 'var(--space-6)', textAlign: 'left' }}>
+            <span className="alert-icon">📧</span>
+            <div>Recibirás un correo de confirmación con todos los detalles de tu orden.</div>
           </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: 'var(--space-lg)',
-            padding: 'var(--space-lg)',
-            backgroundColor: 'var(--color-bg)',
-            borderRadius: 'var(--border-radius)',
-          }}>
-            <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-light)', marginBottom: 'var(--space-sm)' }}>
-                Fecha de recolección
-              </div>
-              <div style={{ fontWeight: '600' }}>
-                {formatDate(quotation.pickup_date)}
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-light)', marginBottom: 'var(--space-sm)' }}>
-                Fecha estimada de entrega
-              </div>
-              <div style={{ fontWeight: '600' }}>
-                {formatDate(quotation.estimated_delivery_date)}
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-light)', marginBottom: 'var(--space-sm)' }}>
-                Método de entrega
-              </div>
-              <div style={{ fontWeight: '600' }}>
-                {quotation.delivery_method}
-              </div>
-            </div>
+          <div style={{ display: 'flex', gap: 'var(--space-4)', marginTop: 'var(--space-8)', flexWrap: 'wrap' }}>
+            <Link to={`/tracking?order=${confirmed.id}`} className="btn btn-primary btn-lg" style={{ flex: 1 }}>
+              Seguir mi orden →
+            </Link>
+            <Link to="/" className="btn btn-outline btn-lg" style={{ flex: 1 }}>
+              Volver al inicio
+            </Link>
           </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 'var(--space-lg)', flexWrap: 'wrap' }}>
-          <button
-            className="btn btn-primary btn-lg"
-            onClick={() => navigate('/tracking')}
-          >
-            Ver seguimiento
-          </button>
-          <button
-            className="btn btn-outline"
-            onClick={() => navigate('/')}
-          >
-            Volver al inicio
-          </button>
         </div>
       </div>
-    );
-  }
+      <CheckoutStyles />
+    </div>
+  );
 
-  if (!quotation) {
-    return <ErrorMessage title="Error" message="No se pudo cargar la cotización" />;
-  }
-
+  /* ── Checkout form ── */
   return (
-    <div>
-      <h1 style={{ marginBottom: 'var(--space-lg)' }}>Confirmar compra</h1>
-
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: 'var(--space-lg)',
-        marginBottom: 'var(--space-2xl)',
-      }}>
-        {/* Resumen de cotización */}
-        <div className="card">
-          <h3 style={{ marginBottom: 'var(--space-lg)' }}>Resumen de cotización</h3>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            gap: 'var(--space-md)',
-            marginBottom: 'var(--space-lg)',
-            borderBottom: '1px solid var(--color-border)',
-            paddingBottom: 'var(--space-lg)',
-          }}>
-            <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-light)' }}>
-                Empresa
-              </div>
-              <div style={{ fontWeight: '600' }}>{quotation.company_name}</div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-light)' }}>
-                Contacto
-              </div>
-              <div style={{ fontWeight: '600' }}>{quotation.contact_name}</div>
-            </div>
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            gap: 'var(--space-md)',
-            marginBottom: 'var(--space-lg)',
-            borderBottom: '1px solid var(--color-border)',
-            paddingBottom: 'var(--space-lg)',
-          }}>
-            <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-light)' }}>
-                Fecha recolección
-              </div>
-              <div style={{ fontWeight: '600' }}>{formatDate(quotation.pickup_date)}</div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-light)' }}>
-                Fecha entrega
-              </div>
-              <div style={{ fontWeight: '600' }}>{formatDate(quotation.estimated_delivery_date)}</div>
-            </div>
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            gap: 'var(--space-md)',
-            marginBottom: 'var(--space-lg)',
-            borderBottom: '1px solid var(--color-border)',
-            paddingBottom: 'var(--space-lg)',
-          }}>
-            <div>Subtotal</div>
-            <div style={{ fontWeight: '600' }}>{formatCurrency(quotation.subtotal)}</div>
-
-            {quotation.extras_total > 0 && (
-              <>
-                <div>Extras</div>
-                <div style={{ fontWeight: '600' }}>{formatCurrency(quotation.extras_total)}</div>
-              </>
-            )}
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            gap: 'var(--space-md)',
-          }}>
-            <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '700' }}>Total</div>
-            <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: '700', color: 'var(--color-secondary)' }}>
-              {formatCurrency(quotation.total)}
-            </div>
-          </div>
+    <div className="page-wrapper checkout-page">
+      <div className="page-header">
+        <div className="container">
+          <h1>Confirmar orden</h1>
+          <p>Revisa el resumen de tu cotización y selecciona el método de pago.</p>
         </div>
+      </div>
 
-        {/* Selección de método de pago */}
-        <div className="card">
-          <h3 style={{ marginBottom: 'var(--space-lg)' }}>Método de pago</h3>
+      <div className="container" style={{ maxWidth: 1100, paddingTop: 'var(--space-10)', paddingBottom: 'var(--space-16)' }}>
+        <div className="checkout-layout">
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
-            <div>
-              {paymentMethods.map((method) => (
-                <label
-                  key={method.value}
-                  style={{
-                    display: 'block',
-                    padding: 'var(--space-md)',
-                    marginBottom: 'var(--space-sm)',
-                    border: '2px solid var(--color-border)',
-                    borderRadius: 'var(--border-radius)',
-                    cursor: 'pointer',
-                    backgroundColor: paymentMethod === method.value ? 'rgba(99, 102, 241, 0.05)' : 'var(--color-white)',
-                    borderColor: paymentMethod === method.value ? '#6366f1' : 'var(--color-border)',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="payment_method"
-                    value={method.value}
-                    checked={paymentMethod === method.value}
-                    onChange={(e) => {
-                      setPaymentMethod(e.target.value);
-                      setPaymentError(null);
-                    }}
-                    style={{ marginRight: 'var(--space-md)', cursor: 'pointer' }}
-                  />
-                  <span>{method.label}</span>
-                </label>
+          {/* Left: Payment */}
+          <div className="checkout-main">
+            {/* Trust badges */}
+            <div className="trust-strip">
+              {TRUST_ITEMS.map(t => (
+                <div key={t.text} className="trust-item">
+                  <span>{t.icon}</span><span>{t.text}</span>
+                </div>
               ))}
             </div>
 
-            {paymentError && <div className="form-error">{paymentError}</div>}
+            <div className="card card-body-lg" style={{ marginTop: 'var(--space-6)' }}>
+              <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: 'var(--space-6)' }}>
+                💳 Método de pago
+              </h2>
 
-            <button
-              type="submit"
-              className="btn btn-secondary btn-lg"
-              disabled={submitting}
-              style={{ width: '100%' }}
-            >
-              {submitting ? 'Procesando...' : 'Confirmar pago'}
-            </button>
-          </form>
+              <div className="payment-methods">
+                {PAYMENT_METHODS.map(method => (
+                  <label
+                    key={method.value}
+                    className={`payment-method-option${paymentMethod === method.value ? ' selected' : ''}`}
+                    onClick={() => setPaymentMethod(method.value)}
+                  >
+                    <div className="payment-method-icon">{method.icon}</div>
+                    <div className="payment-method-info">
+                      <strong>{method.label}</strong>
+                      <span>{method.desc}</span>
+                    </div>
+                    <div className={`q-radio${paymentMethod === method.value ? ' q-radio-on' : ''}`} style={{ marginLeft: 'auto', flexShrink: 0 }}>
+                      {paymentMethod === method.value && <div className="q-radio-dot" />}
+                    </div>
+                  </label>
+                ))}
+              </div>
+
+              {!paymentMethod && (
+                <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginTop: 'var(--space-3)' }}>
+                  ⚠ Selecciona un método de pago para continuar
+                </p>
+              )}
+
+              {orderErr && (
+                <div className="alert alert-error" style={{ marginTop: 'var(--space-6)' }}>
+                  <span className="alert-icon">❌</span>
+                  <div><strong>Error al procesar</strong><br />{orderErr}</div>
+                </div>
+              )}
+
+              <button
+                className="btn btn-success btn-full btn-xl"
+                style={{ marginTop: 'var(--space-8)' }}
+                onClick={handleConfirm}
+                disabled={!paymentMethod || ordering}
+              >
+                {ordering
+                  ? <><div className="spinner spinner-sm" style={{ marginRight: 8 }} />Procesando...</>
+                  : '🚀 Confirmar y ordenar'
+                }
+              </button>
+
+              <p style={{ textAlign: 'center', fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginTop: 'var(--space-4)' }}>
+                🔒 Transacción segura · Al confirmar aceptas nuestros Términos y Condiciones
+              </p>
+            </div>
+          </div>
+
+          {/* Right: Order summary */}
+          {quotation && (
+            <div className="checkout-summary">
+              <div className="card card-body-lg">
+                <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-6)' }}>
+                  📄 Resumen de cotización #{quotation.id}
+                </h3>
+
+                <div className="summary-rows">
+                  {[
+                    ['Empresa',           quotation.company_name],
+                    ['Contacto',          quotation.contact_name],
+                    ['Páginas',           formatPages(quotation.estimated_pages)],
+                    ['Recolección',       formatDate(quotation.pickup_date)],
+                    ['Entrega estimada',  formatDate(quotation.estimated_delivery_date)],
+                    ['Método entrega',    quotation.delivery_method],
+                  ].map(([k, v]) => (
+                    <div key={k} className="summary-row"><span>{k}</span><strong>{v}</strong></div>
+                  ))}
+                </div>
+
+                <div className="divider" />
+
+                <div className="summary-totals">
+                  <div className="summary-row"><span>Subtotal digitalización</span><strong>{formatCurrency(quotation.subtotal)}</strong></div>
+                  {quotation.extras_total > 0 && (
+                    <div className="summary-row"><span>Servicios adicionales</span><strong>{formatCurrency(quotation.extras_total)}</strong></div>
+                  )}
+                  <div className="summary-row summary-total">
+                    <span>Total</span>
+                    <strong style={{ fontSize: 'var(--text-2xl)', color: 'var(--color-brand)' }}>
+                      {formatCurrency(quotation.total)}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="alert alert-success" style={{ marginTop: 'var(--space-5)' }}>
+                  <span className="alert-icon">🏆</span>
+                  <div style={{ fontSize: 'var(--text-xs)' }}>
+                    Precio fijo garantizado. No hay cobros adicionales sorpresa.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      <p style={{ color: 'var(--color-text-light)', fontSize: 'var(--font-size-sm)' }}>
-        💡 Este es un sistema de pago simulado. No se procesará ninguna transacción real.
-      </p>
+      <CheckoutStyles />
     </div>
+  );
+}
+
+function CheckoutStyles() {
+  return (
+    <style>{`
+      .checkout-layout {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: var(--space-8);
+        align-items: start;
+      }
+      .trust-strip {
+        display: flex; gap: var(--space-6);
+        background: var(--color-surface); border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg); padding: var(--space-4) var(--space-6);
+        flex-wrap: wrap;
+      }
+      .trust-item { display:flex; align-items:center; gap:var(--space-2); font-size:var(--text-sm); font-weight:500; color:var(--color-text-secondary); }
+      .summary-rows { display:flex; flex-direction:column; gap:0; }
+      .summary-row {
+        display:flex; justify-content:space-between; align-items:center;
+        padding:var(--space-3) 0; border-bottom:1px solid var(--color-border-subtle);
+        font-size:var(--text-sm);
+      }
+      .summary-row:last-child { border-bottom:none; }
+      .summary-row span  { color:var(--color-text-muted); }
+      .summary-row strong { font-weight:600; }
+      .summary-totals { display:flex; flex-direction:column; gap:0; }
+      .summary-total { padding-top:var(--space-4); }
+      .checkout-confirm-details {
+        background:var(--navy-50);border:1px solid var(--color-border);
+        border-radius:var(--radius-lg);overflow:hidden;
+      }
+      .checkout-confirm-row {
+        display:flex;justify-content:space-between;padding:var(--space-4) var(--space-5);
+        border-bottom:1px solid var(--color-border-subtle);font-size:var(--text-sm);
+        text-align:left;
+      }
+      .checkout-confirm-row:last-child { border-bottom:none; }
+      .checkout-confirm-row span  { color:var(--color-text-muted); }
+      .checkout-confirm-row strong{ font-weight:600; }
+      .q-radio { width:22px;height:22px;border-radius:50%;border:2px solid var(--color-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all var(--ease-fast); }
+      .q-radio-on { border-color:var(--color-brand);background:var(--color-brand); }
+      .q-radio-dot { width:9px;height:9px;background:#fff;border-radius:50%; }
+      @media(max-width:900px) { .checkout-layout { grid-template-columns:1fr; } .checkout-summary { order:-1; } }
+      @media(max-width:640px) { .trust-strip { justify-content:center; gap:var(--space-4); } }
+    `}</style>
   );
 }
 
