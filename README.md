@@ -1,160 +1,201 @@
-# Proyecto: Plataforma Web de Digitalización y Gestión Documental
+# Digitalización Documental
 
-Aplicación web para la cotización, contratación, seguimiento y gestión de servicios de digitalización documental empresarial. Orientado a empresas que desean convertir sus documentos físicos a formato digital, con opción de administrarlos en una bóveda digital simulada.
-
----
-
-## 🚀 Características Principales
-
-### Planes de Servicio
-
-| Plan | Descripción |
-|------|-------------|
-| **Estándar** | Digitalización de documentos físicos y entrega de archivos resultantes |
-| **Premium** | Digitalización + Bóveda Digital con Gestión Documental |
-
-### Servicios Extra
-
-- ⚡ Digitalización urgente
-- 🔍 OCR simulado
-- 📦 Entrega física en unidad proporcionada por la empresa
+Plataforma web full-stack para la cotización, contratación, seguimiento y gestión de servicios de digitalización documental empresarial. Incluye bóveda digital con gestión de metadatos avanzada para clientes del plan Premium.
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## Descripción general
 
-### Frontend
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+El sistema permite a las empresas:
 
-- **ReactJS** con **Vite** para interfaces de usuario rápidas y componentes reutilizables
+1. **Cotizar** servicios de digitalización según volumen de páginas y plan elegido.
+2. **Contratar** mediante un flujo de compra con simulación de pago (4 métodos).
+3. **Hacer seguimiento** del estado del pedido a lo largo de 8 etapas del proceso.
+4. **Acceder a su bóveda digital** (plan Premium) con documentos indexados, metadatos enriquecidos y estado OCR.
+
+El proyecto incluye datos de prueba precargados mediante seeders para funcionar como demo operativo.
+
+---
+
+## Planes de servicio
+
+| Plan      | Precio base         | Plazo estimado | Bóveda digital |
+|-----------|---------------------|----------------|----------------|
+| Estándar  | $15 / 1.000 páginas | 10 días hábiles | No            |
+| Premium   | $25 / 1.000 páginas | 7 días hábiles  | Sí            |
+
+### Servicios adicionales
+
+| Extra                    | Costo                              |
+|--------------------------|------------------------------------|
+| Digitalización urgente   | +30 % del subtotal (reduce días)   |
+| OCR simulado             | $50 fijo                           |
+| Entrega física           | $30 fijo                           |
+
+### Fórmula de cotización
+
+```
+subtotal = (páginas / 1.000) × precio_plan
+total    = subtotal + Σ extras
+```
+
+---
+
+## Arquitectura general
+
+```
+Usuario
+  └── Frontend (React 19 + Vite)
+        └── API REST (FastAPI)
+              └── ORM (SQLAlchemy)
+                    └── PostgreSQL (local o Supabase)
+```
+
+Patrón de capas en el backend: **Modelos → Esquemas → Servicios → Controladores**.
+
+---
+
+## Dependencias principales
 
 ### Backend
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
-- **FastAPI** (Python) para API REST de alto rendimiento
+| Paquete           | Versión  | Propósito                       |
+|-------------------|----------|---------------------------------|
+| fastapi           | 0.136.1  | Framework web ASGI              |
+| uvicorn           | 0.47.0   | Servidor ASGI                   |
+| sqlalchemy        | 2.0.49   | ORM                             |
+| pydantic          | 2.13.4   | Validación de esquemas          |
+| psycopg2-binary   | 2.9.12   | Driver PostgreSQL               |
+| python-dotenv     | 1.2.2    | Variables de entorno            |
 
-### Base de Datos
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+### Frontend
 
-- **PostgreSQL** alojado en **Supabase** (base de datos remota)
-- **SQLAlchemy** como ORM para gestión de modelos
-- **DBeaver** como herramienta de administración visual
-
----
-
-## 🏗️ Arquitectura del Sistema
-Usuario
-↓
-Frontend (ReactJS + Vite)
-↓
-API REST (FastAPI)
-↓
-SQLAlchemy (ORM)
-↓
-PostgreSQL (Supabase)
-
-text
-
-- **Patrón MVC**: Modelos, Controladores, Servicios y Vistas
-- **Cliente-Servidor**: Separación clara entre frontend y backend
+| Paquete           | Versión  | Propósito                       |
+|-------------------|----------|---------------------------------|
+| react             | 19.2.6   | Librería UI                     |
+| react-router-dom  | 7.15.1   | Enrutamiento SPA                |
+| axios             | 1.16.1   | Cliente HTTP                    |
+| vite              | 8.0.12   | Bundler / servidor de desarrollo|
 
 ---
 
-## 📋 Flujo Principal
+## Requisitos previos
 
-1. **Catálogo**: Cliente consulta planes, precios y extras disponibles
-2. **Cotizador**: Ingresa datos de empresa, selecciona plan, cantidad de páginas, método de entrega, fecha de recolección y extras
-3. **Cálculo Automático**: Backend calcula subtotal, extras, total y fecha estimada de entrega
-4. **Compra**: Simulación de pago (tarjeta, transferencia, contra entrega u orden de compra)
-5. **Orden de Servicio**: Se genera automáticamente tras confirmar pago
-6. **Seguimiento**: Cliente monitorea estado del servicio en tiempo real
-7. **Bóveda Digital** (Plan Premium): Acceso a documentos digitalizados con gestión documental
+- Python 3.11 o superior
+- Node.js 20 o superior
+- PostgreSQL 14 o superior (local) **o** cuenta en [Supabase](https://supabase.com)
+- `pip` y `npm` disponibles en el PATH del sistema
 
 ---
 
-## 📊 Fórmula de Cotización
-Subtotal = (cantidad de hojas / 1000) × precio del plan
-Total = Subtotal + Extras
+## Instalación rápida
 
-text
+```bash
+# 1. Clonar el repositorio
+git clone <url-del-repositorio>
+cd digitalizacion
 
-- **Digitalización urgente**: Aplica porcentaje adicional al subtotal y reduce tiempo de entrega
-- **OCR / Entrega física**: Costos fijos adicionales
+# 2. Configurar backend
+cd backend
+python -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env              # Editar DATABASE_URL con los datos reales
 
----
+# 3. Poblar la base de datos con datos de demo
+python seed.py
 
-## 🔄 Estados del Servicio
+# 4. Iniciar el backend
+uvicorn app.main:app --reload --port 8001
 
-| Estado | Descripción |
-|--------|-------------|
-| 📅 Recolección agendada | Servicio programado, pendiente de inicio |
-| 📥 Documentos recolectados | Documentos físicos recibidos |
-| 🖨️ En digitalización | Proceso de escaneo en curso |
-| ✅ Revisión de calidad | Verificación de archivos digitalizados |
-| 📦 Preparando entrega | Archivos listos para envío |
-| 🚀 Entregado | Archivos enviados al cliente |
-| 🏦 Disponible en bóveda | Documentos accesibles en bóveda digital (Premium) |
-| ❌ Cancelado | Orden cancelada (solo en estado inicial) |
+# 5. En otra terminal — configurar e iniciar el frontend
+cd ../frontend
+npm install
+npm run dev
+```
 
-### Regla de Cancelación
-- Solo permitida en estado **"Recolección agendada"**
-- Al cancelar: estado → `Cancelado`, pago → `Devolución pendiente`
+Abrir [http://localhost:5173](http://localhost:5173) en el navegador.
 
----
-
-## 🏦 Bóveda Digital (Plan Premium)
-
-Sistema de gestión documental con metadatos avanzados:
-
-### Metadatos por Documento
-- Nombre del archivo
-- Tipo documental
-- Categoría
-- Área / Departamento
-- Descripción
-- Palabras clave
-- Fecha del documento
-- Nivel de confidencialidad
-- Años de conservación
-- Estado OCR
-- Estado de seguridad
-- URL de almacenamiento
-
-### Funcionalidades
-- 🔍 Búsqueda avanzada por filtros (nombre, tipo, categoría, área, confidencialidad, etc.)
-- 📂 Clasificación documental
-- ⬇️ Descarga de archivos
-- 🚫 Bloqueo automático para órdenes de Plan Estándar
+> Para instrucciones detalladas de despliegue ver
+> [docs/instalacion-configuracion-despligue/instrucciones-configuracion.md](docs/instalacion-configuracion-despligue/instrucciones-configuracion.md)
+> y el [Manual de instalación multientorno](docs/manual-instalacion-multientorno/index.md).
 
 ---
 
-## 🗄️ Estructura de Base de Datos
+## URLs del sistema
 
-| Tabla | Descripción |
-|-------|-------------|
-| `services` | Planes del sistema |
-| `extras` | Servicios adicionales |
-| `quotations` | Cotizaciones generadas |
-| `quotation_extras` | Relación cotizaciones ↔ extras |
-| `orders` | Órdenes de servicio |
-| `vault_documents` | Documentos en bóveda digital y metadatos |
+| Servicio              | URL                                        |
+|-----------------------|--------------------------------------------|
+| Frontend (desarrollo) | http://localhost:5173                      |
+| API REST              | http://localhost:8001                      |
+| Swagger UI            | http://localhost:8001/docs                 |
+| ReDoc                 | http://localhost:8001/redoc                |
+| Panel de administración | http://localhost:5173/admin/login        |
+
+---
+
+## Ejecución en desarrollo
+
+```bash
+# Terminal 1 — Backend
+cd backend
+source venv/bin/activate
+uvicorn app.main:app --reload --port 8001
+
+# Terminal 2 — Frontend
+cd frontend
+npm run dev
+```
+
+## Build de producción
+
+```bash
+cd frontend
+npm run build      # Genera la carpeta dist/
+npm run preview    # Sirve el build localmente para verificar
+```
 
 ---
 
-## ✅ Funcionalidades Implementadas
+## Mantenimiento
 
-- [x] Consulta de planes y extras
-- [x] Generación de cotizaciones con cálculo automático
-- [x] Creación de órdenes desde cotizaciones
-- [x] Simulación de pagos (múltiples métodos)
-- [x] Seguimiento de órdenes por estados
-- [x] Cancelación de órdenes (solo estado inicial)
-- [x] Panel de administración para cambio de estados
-- [x] Bóveda digital con gestión documental (Plan Premium)
-- [x] Búsqueda y filtrado de documentos (Plan Premium)
-- [x] Bloqueo de bóveda para Plan Estándar
+### Actualizar dependencias del backend
+
+```bash
+cd backend && source venv/bin/activate
+pip install --upgrade -r requirements.txt
+```
+
+### Actualizar dependencias del frontend
+
+```bash
+cd frontend && npm update
+```
+
+### Re-ejecutar seeders
+
+```bash
+cd backend && source venv/bin/activate
+python seed.py
+```
+
+Los seeders verifican si los registros ya existen antes de insertar, por lo que es seguro ejecutarlos repetidamente.
 
 ---
+
+## Documentación adicional
+
+| Documento | Descripción |
+|-----------|-------------|
+| [Arquitectura del sistema](docs/informacion-tecnica/arquitectura-sistema.md) | Diagrama y descripción de capas |
+| [Tecnologías utilizadas](docs/informacion-tecnica/tecnologias-utilizadas.md) | Stack tecnológico detallado |
+| [Estructura del proyecto](docs/informacion-tecnica/estructura-proyecto.md) | Árbol de directorios comentado |
+| [Dependencias clave](docs/informacion-tecnica/dependencias-clave.md) | Justificación de cada dependencia |
+| [Comandos útiles](docs/informacion-tecnica/comandos-utiles.md) | Referencia de comandos frecuentes |
+| [API — Endpoints y ejemplos](docs/api-solicitudes/index.md) | Documentación completa de la API |
+| [Diccionario de datos](docs/documentacion-adicional/diccionario-datos.md) | Tablas, columnas y tipos |
+| [Instrucciones de configuración](docs/instalacion-configuracion-despligue/instrucciones-configuracion.md) | Variables de entorno y ajustes |
+| [Ambientes de trabajo](docs/instalacion-configuracion-despligue/ambientes-trabajo.md) | Diferencias entre dev / staging / prod |
+| [Manual de instalación multientorno](docs/manual-instalacion-multientorno/index.md) | Despliegue completo paso a paso |
+| [Guía de contribución](CONTRIBUTING.md) | Flujo de trabajo y estándares de código |
+| [Seguridad y configuración](SECURITY_CONFIG.md) | Variables sensibles y buenas prácticas |
