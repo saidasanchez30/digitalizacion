@@ -304,6 +304,7 @@ function Home() {
           position: relative;
           overflow: hidden;
           color: #fff;
+          z-index: 2;
         }
         .hero-bg-glow {
           position: absolute;
