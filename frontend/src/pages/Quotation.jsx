@@ -460,7 +460,7 @@ function QuotationStyles() {
       .q-step-circle {
         width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
         font-size:var(--text-lg);border:2px solid var(--color-border);background:var(--color-surface);
-        transition:all var(--ease-base);z-index:1;flex-shrink:0;
+        transition:all var(--ease-base);z-index:0;flex-shrink:0;
       }
       .q-done   .q-step-circle { background:var(--color-success);border-color:var(--color-success);color:#fff;font-size:var(--text-base);font-weight:700; }
       .q-active .q-step-circle { background:var(--gradient-brand);border-color:var(--color-brand);color:#fff;box-shadow:var(--shadow-brand); }
